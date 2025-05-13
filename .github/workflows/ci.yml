@@ -22,7 +22,9 @@ jobs:
         # While anyone can push a tag, if we only allow tags in protected branches,
         # we can be sure that the code the tag points to has been reviewed.
         run: |
-          git fetch --depth=1 origin '+refs/heads/*:refs/remotes/origin/*'
+          git branch -a
+          git fetch --all
+          git branch -a
           # `git branch ...` will either return an empty string or a list of branches that contain the tag.
           # The `| grep "[[:alnum:]]"` at the end turns [non-empty or empty stdout] into (0 or 1 return code)
           if ! git branch --contains tags/${TAG} --format '%(refname:short)' --list 'main' 'hotfix/*' | grep "[[:alnum:]]"; then

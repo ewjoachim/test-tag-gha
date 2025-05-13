@@ -22,14 +22,15 @@ jobs:
         # While anyone can push a tag, if we only allow tags in protected branches,
         # we can be sure that the code the tag points to has been reviewed.
         run: |
-          git branch -a
-          git fetch --all
-          git branch -a
-          # `git branch ...` will either return an empty string or a list of branches that contain the tag.
-          # The `| grep "[[:alnum:]]"` at the end turns [non-empty or empty stdout] into (0 or 1 return code)
-          if ! git branch --contains tags/${TAG} --format '%(refname:short)' --list 'main' 'hotfix/*' | grep "[[:alnum:]]"; then
-            echo "Tag is not included in a protected branch. Not building the Docker image for security reasons."
-            exit 1
+          if git merge-base --is-ancestor tags/${TAG} remotes/origin/main; then
+            exit 0
           fi
+
+          # Check all hotfix branches
+          for branch in $(git branch -r --list 'origin/hotfix/*'); do
+            if git merge-base --is-ancestor tags/${TAG} $branch; then
+              exit 0
+            fi
+          done
         env:
           TAG: ${{ github.ref_name }}

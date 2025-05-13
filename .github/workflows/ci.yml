@@ -32,5 +32,8 @@ jobs:
               exit 0
             fi
           done
+
+          echo "Tag is not included in a protected branch. Not building the Docker image for security reasons."
+          exit 1
         env:
           TAG: ${{ github.ref_name }}
